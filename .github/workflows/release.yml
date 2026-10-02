@@ -2,9 +2,13 @@ name: release
 
 # Publishes to npm on a version tag.
 #
-# npm is currently on hold for this package, so the npm job is skipped whenever
-# the NPM_TOKEN secret is absent — pushing a tag then produces a green, skipped
+# npm is currently on hold for this package, so the publish step is skipped
+# whenever the NPM_TOKEN secret is absent — pushing a tag then produces a green
 # run instead of a red one. Add the secret to switch publishing on.
+#
+# NOTE: the token check has to live on a step, not on the job. `secrets` is not
+# an available context in `jobs.<id>.if`, and using it there makes GitHub reject
+# the whole workflow before any job is created (a 0-second run with no jobs).
 
 on:
   push:
@@ -13,9 +17,6 @@ on:
 
 jobs:
   npm:
-    # secrets are available in a job-level condition; without the token there is
-    # nothing to publish with, so skip the whole job.
-    if: ${{ secrets.NPM_TOKEN != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,7 +54,7 @@ jobs:
           fi
 
       - name: Publish
-        if: steps.npm.outputs.published == 'false'
+        if: steps.npm.outputs.published == 'false' && secrets.NPM_TOKEN != ''
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -61,3 +62,7 @@ jobs:
       - name: Already published
         if: steps.npm.outputs.published == 'true'
         run: echo "dsh-codex-ui@$(node -p "require('./package.json').version") is already on npm; nothing to do."
+
+      - name: npm on hold
+        if: steps.npm.outputs.published == 'false' && secrets.NPM_TOKEN == ''
+        run: echo "NPM_TOKEN is not configured; npm publishing is on hold. See docs/PUBLISH.md."
