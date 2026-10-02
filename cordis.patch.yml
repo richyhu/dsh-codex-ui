@@ -1,0 +1,6 @@
+# dsh-codex-ui bundle layer: one loader row. The bare package name is what
+# @deepseek-ai/dsh-client-modules qualifies and serves as lib/client.js.
+- insert:
+    - id: dsh-codex-ui
+      name: 'dsh-codex-ui'
+      config: {}

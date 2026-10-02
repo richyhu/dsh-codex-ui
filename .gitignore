@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Local profile backups captured during development — may contain machine
+# paths and profile state. Never publish these.
+.backup/
+
+# macOS
+.DS_Store
+
+# Logs / scratch
+*.log
