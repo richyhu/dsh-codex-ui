@@ -1,5 +1,11 @@
 name: release
 
+# Publishes to npm on a version tag.
+#
+# npm is currently on hold for this package, so the npm job is skipped whenever
+# the NPM_TOKEN secret is absent — pushing a tag then produces a green, skipped
+# run instead of a red one. Add the secret to switch publishing on.
+
 on:
   push:
     tags:
@@ -7,6 +13,9 @@ on:
 
 jobs:
   npm:
+    # secrets are available in a job-level condition; without the token there is
+    # nothing to publish with, so skip the whole job.
+    if: ${{ secrets.NPM_TOKEN != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
