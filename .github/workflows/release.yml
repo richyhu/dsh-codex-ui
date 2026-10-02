@@ -2,13 +2,13 @@ name: release
 
 # Publishes to npm on a version tag.
 #
-# npm is currently on hold for this package, so the publish step is skipped
-# whenever the NPM_TOKEN secret is absent — pushing a tag then produces a green
-# run instead of a red one. Add the secret to switch publishing on.
+# npm publishing is currently on hold for this package. The publish step checks
+# for the token itself and exits green when it is absent, so a tag push is still
+# a useful release marker. Add the NPM_TOKEN secret to switch publishing on.
 #
-# NOTE: the token check has to live on a step, not on the job. `secrets` is not
-# an available context in `jobs.<id>.if`, and using it there makes GitHub reject
-# the whole workflow before any job is created (a 0-second run with no jobs).
+# Deliberately conservative: no `secrets` reference in any `if`. GitHub rejects
+# such workflows before creating a job, which surfaces only as a 0-second run
+# with zero jobs ("This run likely failed because of a workflow file issue").
 
 on:
   push:
@@ -42,27 +42,21 @@ jobs:
       - name: Verify the package contents
         run: npm pack --dry-run
 
-      # A tag can be pushed after the version was already published by hand.
-      # That is not a failure, so skip instead of going red.
-      - name: Check whether this version is already on npm
-        id: npm
-        run: |
-          if npm view "dsh-codex-ui@$(node -p "require('./package.json').version")" version >/dev/null 2>&1; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "published=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Publish
-        if: steps.npm.outputs.published == 'false' && secrets.NPM_TOKEN != ''
-        run: npm publish --access public --provenance
+      - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
 
-      - name: Already published
-        if: steps.npm.outputs.published == 'true'
-        run: echo "dsh-codex-ui@$(node -p "require('./package.json').version") is already on npm; nothing to do."
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is not configured; npm publishing is on hold."
+            echo "See docs/PUBLISH.md to switch it on."
+            exit 0
+          fi
 
-      - name: npm on hold
-        if: steps.npm.outputs.published == 'false' && secrets.NPM_TOKEN == ''
-        run: echo "NPM_TOKEN is not configured; npm publishing is on hold. See docs/PUBLISH.md."
+          if npm view "dsh-codex-ui@$version" version >/dev/null 2>&1; then
+            echo "dsh-codex-ui@$version is already on npm; nothing to do."
+            exit 0
+          fi
+
+          npm publish --access public --provenance
