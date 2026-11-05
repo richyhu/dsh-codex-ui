@@ -16,7 +16,7 @@ composer left untouched.
 > **Status: personal project, moving target.** This plugin restyles the
 > shipped client from the outside. It keys off stable `data-cx-*` anchors and
 > `[class*="_suffix"]` selectors, but DeepSeek Harness is in release candidate
-> and internals do move. Tested against **0.2.0-rc.2** only.
+> and internals do move. Tested against **0.2.0-rc.2** and **0.2.2-rc.1**.
 
 ## What you get
 

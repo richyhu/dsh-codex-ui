@@ -1,6 +1,6 @@
 {
   "name": "dsh-codex-ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Codex-style rail and navigation shell for the DeepSeek Harness Web UI.",
   "keywords": [
     "dsh",

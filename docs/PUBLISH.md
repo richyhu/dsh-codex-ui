@@ -70,6 +70,7 @@ npm view dsh-codex-ui version
 | DSH 版本 | 状态 |
 | --- | --- |
 | 0.2.0-rc.2 | 已验证 |
+| 0.2.2-rc.1 | 已验证（0.2.2 改了 CSS 前缀 `_3WPZCG_`→`kB3qhq_`、视图标签多了一层 `_viewTabs`、面板列表多了 `_moreAnchor` 溢出项） |
 
 如果一个版本出现侧边栏错乱，先查这些锚点是否还在（都在 `lib/client.js` 的 `ANCHORS` 表里）：
 
